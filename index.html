@@ -1,0 +1,415 @@
+```html
+<!-- Chosen Palette: Royal Gold & Velvet Purple -->
+<!-- Application Structure Plan: Single-page luxury interactive birthday experience built with modular sections (Hero, Interactive Cake, Lantern Sky, Gift Unboxing, Memory Flip Cards, Photo Gallery, Balloon Game, WhatsApp Share). Structured to maximize engagement, delight, and emotional impact. -->
+<!-- Visualization & Content Choices: Uses HTML5 Canvas for dynamic particles/lanterns/confetti, Web Audio API for polyphonic synthesized music, CSS 3D transforms for gift & flip cards. CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>عيد ميلاد سعيد يا ساره | مفاجأة ملكية 👑✨</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;800;900&family=Reem+Kufi:wght@500;700;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        midnight: '#070312',
+                        royalPurple: '#15092b',
+                        deepVelvet: '#230b42',
+                        goldMetallic: '#f59e0b',
+                        goldLight: '#fef08a',
+                        roseGold: '#f43f5e',
+                        softLavender: '#c084fc',
+                        blushPink: '#f472b6'
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        tajawal: ['Tajawal', 'sans-serif'],
+                        amiri: ['Amiri', 'serif'],
+                        kufi: ['Reem Kufi', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070312;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(to bottom, #f59e0b, #c084fc);
+            border-radius: 10px;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: radial-gradient(circle at 50% 15%, #2a0a4c 0%, #0d051c 50%, #04010a 100%);
+            color: #f8fafc;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+
+        .gold-border {
+            border: 1px solid transparent;
+            background: linear-gradient(#0c061a, #0c061a) padding-box,
+                        linear-gradient(135deg, #f59e0b 0%, #fef08a 50%, #f43f5e 100%) border-box;
+        }
+
+        .gold-shimmer-btn {
+            background: linear-gradient(110deg, #f59e0b 0%, #fef08a 40%, #f59e0b 60%, #d97706 100%);
+            background-size: 200% 100%;
+            animation: goldShimmer 3s infinite linear;
+        }
+
+        @keyframes goldShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
+        }
+
+        .glass-card-hover {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(245, 158, 11, 0.6);
+            box-shadow: 0 30px 70px rgba(192, 132, 252, 0.3);
+        }
+
+        .glow-gold {
+            text-shadow: 0 0 15px rgba(245, 158, 11, 0.8), 0 0 30px rgba(254, 240, 138, 0.6);
+        }
+        .glow-lavender {
+            text-shadow: 0 0 20px rgba(192, 132, 252, 0.8), 0 0 40px rgba(244, 63, 94, 0.5);
+        }
+
+        .flip-card {
+            perspective: 1200px;
+        }
+        .flip-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .flip-card.flipped .flip-card-inner {
+            transform: rotateY(180deg);
+        }
+        .flip-card-front, .flip-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1.5rem;
+        }
+        .flip-card-back {
+            transform: rotateY(180deg);
+        }
+
+        .flame {
+            width: 18px;
+            height: 28px;
+            background: linear-gradient(to top, #ff2a00, #ff9900, #ffffa6);
+            border-radius: 50% 50% 20% 20%;
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: flameFlicker 0.35s infinite alternate ease-in-out;
+            box-shadow: 0 0 20px #ff9900, 0 0 40px #ff2a00;
+            cursor: pointer;
+        }
+        @keyframes flameFlicker {
+            0% { transform: translateX(-50%) scale(1) rotate(-3deg); opacity: 0.95; }
+            100% { transform: translateX(-50%) scale(1.25) rotate(4deg); opacity: 1; }
+        }
+        .flame.extinguished {
+            display: none;
+        }
+        .smoke {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 30px;
+            background: rgba(240, 240, 240, 0.85);
+            border-radius: 50%;
+            animation: smokeRise 1.8s forwards ease-out;
+            pointer-events: none;
+        }
+        @keyframes smokeRise {
+            0% { opacity: 0.95; transform: translateX(-50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-70px) scale(4.5); }
+        }
+
+        .gift-container {
+            perspective: 1000px;
+        }
+        .gift-box {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gift-box:hover {
+            transform: scale(1.06) rotate(1deg);
+        }
+        .gift-lid {
+            transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform-origin: top;
+        }
+        .gift-box.opened .gift-lid {
+            transform: translateY(-95px) rotate(-28deg) scale(0.92);
+        }
+
+        .sky-lantern {
+            position: absolute;
+            bottom: -80px;
+            width: 48px;
+            height: 65px;
+            background: linear-gradient(to top, #f59e0b, #f43f5e);
+            border-radius: 14px 14px 6px 6px;
+            box-shadow: 0 0 30px rgba(245, 158, 11, 0.9);
+            animation: floatLantern 11s linear infinite;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #fff;
+            font-weight: bold;
+        }
+        .sky-lantern::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            width: 22px;
+            height: 8px;
+            background: #fef08a;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #fef08a;
+        }
+        @keyframes floatLantern {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 0.9; }
+            100% { transform: translateY(-120vh) rotate(15deg); opacity: 0; }
+        }
+
+        .polaroid-card {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 14px 14px 28px 14px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+        }
+        .polaroid-card:hover {
+            transform: scale(1.08) rotate(0deg) !important;
+            z-index: 30;
+            box-shadow: 0 30px 60px rgba(245, 158, 11, 0.4);
+        }
+
+        .eq-bar {
+            width: 4px;
+            background: #fef08a;
+            border-radius: 2px;
+            animation: eqBounce 0.8s infinite ease-in-out alternate;
+        }
+        .eq-bar:nth-child(1) { height: 12px; animation-delay: 0.1s; }
+        .eq-bar:nth-child(2) { height: 20px; animation-delay: 0.3s; }
+        .eq-bar:nth-child(3) { height: 10px; animation-delay: 0.2s; }
+        .eq-bar:nth-child(4) { height: 16px; animation-delay: 0.4s; }
+        @keyframes eqBounce {
+            0% { transform: scaleY(0.3); }
+            100% { transform: scaleY(1.3); }
+        }
+
+        .balloon-item {
+            position: absolute;
+            bottom: -100px;
+            cursor: pointer;
+            animation: balloonRise 8s linear infinite;
+        }
+        @keyframes balloonRise {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-115vh) rotate(25deg); opacity: 0.8; }
+        }
+    </style>
+</head>
+<body class="relative min-h-screen text-slate-100 selection:bg-goldMetallic selection:text-slate-950 pb-24">
+
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <div id="welcomeGate" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/95 backdrop-blur-3xl transition-all duration-1000 p-4">
+        <div class="max-w-xl w-full text-center space-y-8 glass-card p-8 sm:p-12 rounded-3xl gold-border shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-52 h-52 bg-purple-600/30 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-20 -right-20 w-52 h-52 bg-amber-500/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 space-y-6">
+                <div class="w-28 h-28 mx-auto rounded-full bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-600 p-1 animate-pulse shadow-2xl flex items-center justify-center">
+                    <div class="w-full h-full bg-slate-950 rounded-full flex items-center justify-center text-5xl">
+                        👑
+                    </div>
+                </div>
+
+                <span class="inline-block px-5 py-2 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-bold tracking-widest uppercase">
+                    مفاجأة عيد ميلاد ساره الملكية ✨
+                </span>
+
+                <h1 class="text-3xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-pink-200 to-purple-200 font-kufi">
+                    أهلاً بكِ يا <span class="text-amber-300 glow-gold">ساره</span> 💖
+                </h1>
+
+                <p class="text-purple-200/90 text-base sm:text-lg font-light leading-relaxed font-tajawal">
+                    أخوكِ أعد لكِ هذه المفاجأة الفاخرة للاحتفال بعيد ميلادكِ السعيد! اضغطي على الزر الملكي أدناه لبدء المعزوفة ولإطلاق الألعاب النارية ومعايدتكِ الخاصة 💌
+                </p>
+
+                <div class="pt-4">
+                    <button onclick="enterCelebration()" class="group relative inline-flex items-center justify-center px-10 py-5 text-lg font-black text-slate-950 transition-all duration-300 gold-shimmer-btn rounded-full shadow-2xl hover:scale-105 active:scale-95 hover:shadow-amber-400/50">
+                        <span class="flex items-center gap-3">
+                            <i class="fas fa-gift text-2xl group-hover:rotate-12 transition-transform duration-300"></i>
+                            <span>اضغطي هنا لفتح مفاجأة عيد ميلادكِ يا ساره ✨🎂</span>
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <header class="fixed top-0 left-0 right-0 z-40 px-4 py-3 bg-slate-950/70 backdrop-blur-xl border-b border-white/10 flex justify-between items-center">
+        <div class="flex items-center space-x-3 space-x-reverse">
+            <span class="text-2xl animate-bounce">🎂</span>
+            <div class="flex flex-col">
+                <span class="font-bold text-base text-amber-200 font-kufi tracking-wide" id="navTitle">ساره | عيد ميلاد سعيد 💖</span>
+                <span class="text-xs text-purple-300/80">من أخيكِ وسندكِ دائماً</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3 space-x-reverse">
+            <div id="audioWidget" onclick="toggleMusic()" class="cursor-pointer glass-card px-4 py-2 rounded-full border border-amber-400/30 flex items-center gap-3 hover:bg-white/10 transition">
+                <div class="flex items-end gap-1 h-5" id="eqBars">
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                    <div class="eq-bar"></div>
+                </div>
+                <span id="musicBtnLabel" class="text-xs font-bold text-amber-200">لحن المعايدة</span>
+                <i id="musicIcon" class="fas fa-pause text-amber-300 text-xs"></i>
+            </div>
+
+            <button onclick="triggerMassiveFireworks()" class="p-2.5 rounded-full glass-card hover:bg-amber-400/20 text-amber-300 transition border border-amber-400/30" title="إطلاق ألعاب نارية">
+                <i class="fas fa-fireworks text-base"></i>
+            </button>
+
+            <button onclick="openSettingsModal()" class="p-2.5 rounded-full glass-card hover:bg-purple-500/20 text-purple-200 transition border border-purple-400/30" title="تخصيص الرسالة">
+                <i class="fas fa-sliders text-base"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="relative z-10 max-w-5xl mx-auto px-4 pt-28 space-y-20">
+
+        <section class="text-center space-y-6 pt-4">
+            <div class="inline-flex items-center gap-2 px-6 py-2 rounded-full glass-card border border-amber-300/40 text-amber-200 font-semibold text-sm shadow-xl animate-pulse">
+                <span>✨</span>
+                <span>إلى أميرة القلوب وأغلى أخت في الدنيا</span>
+                <span>✨</span>
+            </div>
+
+            <h1 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tight leading-tight glow-lavender text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-pink-300 to-purple-200 font-kufi">
+                كل عام وأنتِ بقلبي يا <span id="heroHerName" class="text-amber-300 glow-gold underline decoration-rose-500 underline-offset-8">ساره</span>! 🌸✨
+            </h1>
+
+            <p id="heroSubtitle" class="text-lg sm:text-2xl text-purple-200/90 font-light max-w-3xl mx-auto leading-relaxed font-tajawal">
+                يوم ميلادكِ هو أجمل تواريخ السنة، وأجمل هدية أكرمني بها الله كأخ وسند 🤍
+            </p>
+
+            <div class="pt-4 flex justify-center">
+                <div class="glass-card gold-border px-8 py-4 rounded-3xl flex items-center gap-6 sm:gap-12 text-center shadow-2xl">
+                    <div>
+                        <span class="block text-3xl sm:text-4xl font-extrabold text-amber-300 glow-gold">100%</span>
+                        <span class="text-xs sm:text-sm text-purple-200">سند وأمان أخوي</span>
+                    </div>
+                    <div class="h-10 w-px bg-white/20"></div>
+                    <div>
+                        <span class="block text-3xl sm:text-4xl font-extrabold text-pink-300">#1</span>
+                        <span class="text-xs sm:text-sm text-purple-200">أغلى أخت وصديقة</span>
+                    </div>
+                    <div class="h-10 w-px bg-white/20"></div>
+                    <div>
+                        <span class="block text-3xl sm:text-4xl font-extrabold text-purple-300 glow-lavender">∞</span>
+                        <span class="text-xs sm:text-sm text-purple-200">معزة وحب أمينة</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card gold-border rounded-3xl p-6 sm:p-12 relative overflow-hidden shadow-2xl">
+            <div class="absolute -top-12 -right-12 w-48 h-48 bg-amber-400/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute -bottom-12 -left-12 w-48 h-48 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="text-center mb-8">
+                <span class="px-5 py-2 rounded-full bg-amber-400/20 text-amber-300 text-sm font-bold border border-amber-300/40 inline-flex items-center gap-2">
+                    <i class="fas fa-crown text-amber-300"></i>
+                    <span>وثيقة المعايدة الملكية الخاصة من أخيكِ</span>
+                </span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-amber-200 mt-4 glow-gold font-kufi">إلى روح قلبي وأختي الحبيبة ساره 🤍</h2>
+            </div>
+
+            <div class="max-w-3xl mx-auto rounded-2xl bg-slate-950/80 p-6 sm:p-10 border border-purple-400/30 space-y-6 leading-relaxed text-right font-amiri text-lg sm:text-2xl text-slate-100 shadow-inner">
+                <p class="text-center text-2xl sm:text-3xl font-bold text-amber-300 border-b border-white/10 pb-4 font-cairo">
+                    🎉🎂 عيد ميلاد سعيد يا أغلى ما في حياتي وقمر أيامي! 🎂🎉
+                </p>
+
+                <p class="text-purple-200 font-semibold leading-loose">
+                    إلى روح قلبي، وأفضل صديقة، وأختي وحبيبتي... 🤍<br>
+                    كل عام وأنتِ النور الذي يُضيء أيامي، والأمان الذي ألجأ إليه دائمًا. 🌸
+                </p>
+
+                <p class="text-purple-100 leading-loose">
+                    في مثل هذا اليوم، وُلدتِ لتكوني أجمل نِعمة أنعم الله بها عليّ. 💖<br>
+                    أتمنى لكِ عامًا يُشبه جمال روحكِ وطهارة قلبكِ، تُحققين فيه كل ما تتمنين، وتظلين دائمًا بجانبي، أميرة قلبي وسندي ورفيقة درب لا تُعوَّض. 💐
+                </p>
+
+                <div class="pt-6 border-t border-white/10 text-left font-cairo text-amber-300 font-bold text-xl sm:text-2xl">
+                    ✨ كل عام وأنتِ بخير يا كل خيري! ✨<br>
+                    <span class="text-sm font-normal text-purple-300">~ أخوكِ المحب والسند دائماً ❤️</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="glass-card rounded-3xl p-8 text-center relative overflow-hidden border border-purple-400/30 shadow-2xl">
+            <h2 class="text-3xl font-bold text-amber-300 mb-2 glow-gold font-kufi">🎂 كعكة عيد ميلاد ساره الملكية 🎂</h2>
+            <p class="text-sm text-purple-200 mb-8">اضغطي على الشموع الثلاث لإطفائها واتمني أمنية جميلة من قلبكِ! ✨</p>
+
+            <div class="py-8 flex flex-col items-center justify-center min-h-[280px]">
+                <div class="relative flex flex-col items-center justify-end w-72 h-52">
+                    
+                    <div class="flex justify-center gap-8 mb-1 z-20">
+                        <div class="candle relative w-4 h-14 bg-gradient-to-t from-purple-400 to-white rounded-t-sm shadow-md cursor-pointer" onclick="blowCandle(0)" title="اضغطي لإطفاء الشمعة">
+                            <div class="flame" id="flame-0"></div>
+                        </div>
+                        <div class="candle relative w-4 h-16 bg-gradient-to-t from-amber-300 to-white rounded-t-sm shadow-md cursor-pointer" onclick="blowCandle(1)" title="اضغطي لإطفاء الشمعة">
